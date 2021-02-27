@@ -6,7 +6,7 @@
   When clicked, shows the answer to the question.
 
 ### App Walk-though
-  https://imgur.com/a/Ogumai8
+  [img]https://i.imgur.com/nCf9nMU.gif[/img]
 
 <img src="YOUR_GIF_URL_HERE" width=200><br>
 
