@@ -6,7 +6,7 @@
 Added an option to add a new flashcard, cancel new flashcard, and save new flashcard.
 
 ### App Walk-though
-<img src=https://imgur.com/FeYEtva width=200><br>
+<img src=https://imgur.com/FeYEtva.gif width=200><br>
 
 ## Required
 - [x] User can click on a ‘+’ button that takes the user to new ‘Add Card Screen’
