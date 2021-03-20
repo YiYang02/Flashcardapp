@@ -9,8 +9,6 @@ User can create flashcards and still see them after the app is relaunched. They 
 
 <img src= https://imgur.com/jfZ43Fg.gif width=200><br>
 
-`TODO://` In the User stories section below, add an `x` between the `-[ ]` like this `- [x]` for any user story you complete. (☝️ Remove this paragraph after after checking off user stories)
-
 ## Required
 - [X] User can create a card and still see their created card when the app is relaunched.
 - [X] User can create muliple cards and browse through all created cards
