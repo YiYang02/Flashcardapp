@@ -3,9 +3,13 @@ package yi.yang.myflashcardapp;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,15 +45,36 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        findViewById(R.id.flashcard_question).setOnClickListener(new View.OnClickListener(){
+        questionTextView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 questionTextView.setVisibility(View.INVISIBLE);
                 answerTextView.setVisibility(View.VISIBLE);
+
+                View answerTextView = findViewById(R.id.flashcard_answer);
+
+                // get the center for the clipping circle
+                int cx = answerTextView.getWidth() / 2;
+                int cy = answerTextView.getHeight() / 2;
+
+                // get the final radius for the clipping circle
+                float finalRadius = (float) Math.hypot(cx, cy);
+
+                questionTextView.setVisibility(View.INVISIBLE);
+                answerTextView.setVisibility(View.VISIBLE);
+
+                // create the animator for this view (the start radius is zero)
+                Animator anim = ViewAnimationUtils.createCircularReveal(answerTextView, cx, cy, 0f, finalRadius);
+
+                // hide the question and show the answer to prepare for playing the animation!
+
+                anim.setDuration(3000);
+                anim.start();
+
             }
         });
 
-        findViewById(R.id.flashcard_answer).setOnClickListener(new View.OnClickListener(){
+        answerTextView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 questionTextView.setVisibility(View.VISIBLE);
@@ -60,35 +85,63 @@ public class MainActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent(MainActivity.this, AddFlashcard.class);
                 MainActivity.this.startActivityForResult(intent, 100);
+
+                overridePendingTransition(R.anim.right_in, R.anim.left_out);
+
             }
         });
 
+        //goes to the next flashcard
         findViewById(R.id.next_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                final Animation leftOutAnim = AnimationUtils.loadAnimation(v.getContext(), R.anim.left_out);
+                final Animation rightInAnim = AnimationUtils.loadAnimation(v.getContext(), R.anim.right_in);
+
                 // don't try to go to next card if you have no cards to begin with
                 if (allFlashcards.size() == 0)
                     return;
                 // advance our pointer index so we can show the next card
                 currentCardDisplayedIndex++;
 
-                // make sure we don't get an IndexOutOfBoundsError if we are viewing the last indexed card in our list
-                if(currentCardDisplayedIndex >= allFlashcards.size()) {
-                    Snackbar.make(questionTextView,
-                            "You've reached the end of the cards, going back to start.",
-                            Snackbar.LENGTH_SHORT)
-                            .show();
-                    currentCardDisplayedIndex = 0;
-                }
+                findViewById(R.id.flashcard_question).startAnimation(leftOutAnim);
 
-                // set the question and answer TextViews with data from the database
-                allFlashcards = flashcardDatabase.getAllCards();
-                Flashcard flashcard = allFlashcards.get(currentCardDisplayedIndex);
+                leftOutAnim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
 
-                ((TextView) findViewById(R.id.flashcard_question)).setText(flashcard.getAnswer());
-                ((TextView) findViewById(R.id.flashcard_answer)).setText(flashcard.getQuestion());
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        questionTextView.startAnimation(rightInAnim);
+
+                        // make sure we don't get an IndexOutOfBoundsError if we are viewing the last indexed card in our list
+                        if(currentCardDisplayedIndex >= allFlashcards.size()) {
+                            Snackbar.make(questionTextView,
+                                    "You've reached the end of the cards, going back to start.",
+                                    Snackbar.LENGTH_SHORT)
+                                    .show();
+                            currentCardDisplayedIndex = 0;
+                        }
+
+                        // set the question and answer TextViews with data from the database
+                        allFlashcards = flashcardDatabase.getAllCards();
+                        Flashcard flashcard = allFlashcards.get(currentCardDisplayedIndex);
+
+                        ((TextView) findViewById(R.id.flashcard_question)).setText(flashcard.getQuestion());
+                        ((TextView) findViewById(R.id.flashcard_answer)).setText(flashcard.getAnswer());
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                        // we don't need to worry about this method
+                    }
+                });
             }
         });
 
